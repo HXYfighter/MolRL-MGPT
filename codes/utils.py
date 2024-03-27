@@ -22,7 +22,6 @@ def randomize_smiles(smiles):
     new_mol = Chem.RenumberAtoms(mol, ans)
     return Chem.MolToSmiles(new_mol, canonical=False)
 
-# @torch.no_grad()
 def likelihood(model, seqs):
     nll_loss = nn.NLLLoss(reduction="none")
     seqs = seqs.cuda()
@@ -33,12 +32,6 @@ def likelihood(model, seqs):
 
 @torch.no_grad()
 def sample_SMILES(model, voc, n_mols=100, block_size=100, temperature=1.0, top_k=10):
-    """
-    take a conditioning sequence of indices in x (of shape (b,t)) and predict the next token in
-    the sequence, feeding the predictions back into the model each time. Clearly the sampling
-    has quadratic complexity unlike an RNN that is only linear, and has a finite context window
-    of block_size, unlike an RNN that has an infinite context window.
-    """
     nll_loss = nn.NLLLoss(reduction="none")
     codes = torch.zeros((n_mols, 1), dtype=torch.long).to("cuda")
     codes[:] = voc["^"]

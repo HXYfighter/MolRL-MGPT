@@ -22,7 +22,6 @@ from assess_goal_directed_generation import assess_goal_directed_generation
 from model import GPT, GPTConfig
 from vocabulary import read_vocabulary
 from utils import set_seed, sample_SMILES, likelihood, to_tensor, calc_fingerprints
-# from conversions import sample_unique_sequences
 
 from time import time
 class MARL_goal_directed_generator(GoalDirectedGenerator):
@@ -120,21 +119,14 @@ class MARL_goal_directed_generator(GoalDirectedGenerator):
                 prior_likelihood = likelihood(prior, seqs)
                 agent_likelihood = likelihood(agents[i], seqs)
                 loss = torch.pow(self.sigma1 * to_tensor(np.array(scores)) - (prior_likelihood - agent_likelihood), 2)
-                # loss = torch.pow(self.sigma1 * (1 - step / self.n_steps) * to_tensor(np.array(scores)) - (prior_likelihood - agent_likelihood), 2)
                 for j in range(i):
                     agent_j_likelihood = likelihood(agents[j], seqs)
                     loss -= self.sigma2 * torch.pow(agent_j_likelihood - agent_likelihood, 2)
-                    self.writer.add_scalars('agents diff', {f'agent_{j}{i}': torch.mean(agent_j_likelihood - agent_likelihood).item()}, step)
                 loss = loss.mean()
 
                 optimizers[i].zero_grad()
                 loss.backward()
                 optimizers[i].step()
-
-                # tensorboard
-                self.writer.add_scalars('training loss', {f'agent_{i}': loss.item(), }, step)
-                self.writer.add_scalars('mean score', {f'agent_{i}': np.mean(scores), }, step)
-                self.writer.add_scalars('agent-prior diff', {f'agent_{i}': torch.mean(prior_likelihood - agent_likelihood).item()}, step)
 
             if self.task_id in list(range(3, 6)) + list(range(8, 20)):
                 self.writer.add_scalar('top-1 score', np.max(np.array(self.memory["scores"])), step)

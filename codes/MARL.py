@@ -113,23 +113,15 @@ class MARL_trainer():
             
                 prior_likelihood = likelihood(prior, seqs)
                 agent_likelihood = likelihood(agents[i], seqs)
-                # loss = torch.pow(self.sigma1 * to_tensor(np.array(scores)) - (prior_likelihood - agent_likelihood), 2)
                 loss = torch.pow(self.sigma1 * (1 - step / self.n_steps) * to_tensor(np.array(scores)) - (prior_likelihood - agent_likelihood), 2)
                 for j in range(i):
                     agent_j_likelihood = likelihood(agents[j], seqs)
-                    # loss -= self.sigma2 * torch.pow(agent_j_likelihood - agent_likelihood, 2)
                     loss -= self.sigma2 * torch.abs(agent_j_likelihood - agent_likelihood) * to_tensor(np.array(scores))
-                    self.writer.add_scalars('agents diff', {f'agent_{j}{i}': torch.mean(agent_j_likelihood - agent_likelihood).item()}, step)
                 loss = loss.mean()
 
                 optimizers[i].zero_grad()
                 loss.backward()
                 optimizers[i].step()
-
-                # tensorboard
-                self.writer.add_scalars('training loss', {f'agent_{i}': loss.item(), }, step)
-                self.writer.add_scalars('mean score', {f'agent_{i}': np.mean(scores), }, step)
-                self.writer.add_scalars('agent-prior diff', {f'agent_{i}': torch.mean(prior_likelihood - agent_likelihood).item()}, step)
 
             self.writer.add_scalar('mean score in memory', np.mean(np.array(self.memory["scores"])), step)
             self.writer.add_scalar('top-1', self.memory["scores"][0], step)
@@ -177,8 +169,8 @@ if __name__ == "__main__":
     set_seed(42)
 
     writer = SummaryWriter(args.output_dir + f"{args.oracle}/{args.num_agents}_{args.model_type}_{args.run_name}/")
-    # if not os.path.exists(args.output_dir):
-    #     os.makedirs(args.output_dir)
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
     writer.add_text("configs", str(args))
 
     RL_trainer = MARL_trainer(logger=writer, configs=args)

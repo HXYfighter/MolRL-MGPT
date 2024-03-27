@@ -1,17 +1,8 @@
-# coding=utf-8
-# copy from https://github.com/MolecularAI/reinvent-models/blob/f378f9412bc7eb74d6a7c61fc4af307baa40d41b/reinvent_models/reinvent_core/models/vocabulary.py
-"""
-Vocabulary helper class
-"""
-
 import re
 import numpy as np
 from tqdm import tqdm
 
-
-# contains the data structure
 class Vocabulary:
-    """Stores the tokens and their conversion to vocabulary indexes."""
 
     def __init__(self, tokens=None, starting_id=0):
         self._tokens = {}
@@ -48,7 +39,7 @@ class Vocabulary:
         return token_or_id in self._tokens
 
     def __eq__(self, other_vocabulary):
-        return self._tokens == other_vocabulary._tokens  # pylint: disable=W0212
+        return self._tokens == other_vocabulary._tokens
 
     def __len__(self):
         return len(self._tokens) // 2
@@ -64,7 +55,6 @@ class Vocabulary:
         return vocab_index
 
     def decode(self, vocab_index):
-        """Decodes a vocabulary index matrix to a list of tokens."""
         tokens = []
         for idx in vocab_index:
             tokens.append(self._tokens[idx])
@@ -83,7 +73,6 @@ class Vocabulary:
 
 
 class SMILESTokenizer:
-    """Deals with the tokenization and untokenization of SMILES."""
 
     REGEXPS = {
         "brackets": re.compile(r"(\[[^\]]*\])"),
@@ -113,7 +102,6 @@ class SMILESTokenizer:
         return tokens
 
     def untokenize(self, tokens):
-        """Untokenizes a SMILES string."""
         smi = ""
         for token in tokens:
             if token == "$":
@@ -124,7 +112,6 @@ class SMILESTokenizer:
 
 
 def read_vocabulary(vol_dict_file):
-    """ Read a vocabulary from existing file. Each line is like token freq\n """
     tokens = set()
     with open(vol_dict_file) as f:
         lines = f.readlines()
@@ -133,19 +120,15 @@ def read_vocabulary(vol_dict_file):
             tokens.update([curr_token])
     
     vocabulary = Vocabulary()
-    # vocabulary.update(["$", "^"] + list(tokens))  # end token is 0 (also counts as padding)
     vocabulary.update(["<pad>", "$", "^"] + sorted(tokens))
     return vocabulary    
 
-# read_vocabulary("./utils/zinc_dict.txt")
 
 def create_vocabulary(smiles_list, tokenizer):
-    """Creates a vocabulary for the SMILES syntax."""
     tokens = set()
     for smi in tqdm(smiles_list):
         tokens.update(tokenizer.tokenize(smi, with_begin_and_end=False))
 
     vocabulary = Vocabulary()
-    # vocabulary.update(["$", "^"] + sorted(tokens))  # end token is 0 (also counts as padding)
     vocabulary.update(["<pad>", "$", "^"] + sorted(tokens))
     return vocabulary
