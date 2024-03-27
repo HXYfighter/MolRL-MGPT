@@ -15,9 +15,11 @@ openbabel
 
 ## Dataset & Docking
 
-Following MolBART, we use a filtered ZINC dataset containing 100M SMILES. The files are available at [MolecularAI/Chemformer](https://github.com/MolecularAI/Chemformer).
+Following Chemformer, we use a filtered ZINC dataset containing 100M SMILES. The files are available at [MolecularAI/Chemformer](https://github.com/MolecularAI/Chemformer).
 
-The filtered ChEMBL dataset and the protein structures can be found in `data/`.
+The ChEMBL dataset is available at [ChEMBL](https://www.ebi.ac.uk/chembl/).
+
+The SMILES vocabulary and protein structures can be found in `data/`.
 
 Quick Vina 2 is available at [QuickVina](https://qvina.github.io/).
 
@@ -40,5 +42,17 @@ python codes/MARL.py --task_id 0
 ```bash
 python codes/MARL.py --oracle docking_PLPro_7JIR_mpo
 python codes/MARL.py --oracle docking_RdRp_mpo
+```
+
+## Citation
+
+```
+@article{hu2024novo,
+  title={De novo Drug Design using Reinforcement Learning with Multiple GPT Agents},
+  author={Hu, Xiuyuan and Liu, Guoqing and Zhao, Yang and Zhang, Hao},
+  journal={Advances in Neural Information Processing Systems},
+  volume={36},
+  year={2024}
+}
 ```
 
